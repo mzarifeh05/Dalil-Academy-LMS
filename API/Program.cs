@@ -1,5 +1,8 @@
+using API.Middleware;
 using Core.Respository;
 using Core.Service;
+using Core.Validators;
+using FluentValidation;
 using Infra.Data;
 using Infra.Respository;
 using Infra.Service;
@@ -24,7 +27,13 @@ builder.Services.AddScoped<ICourseRepository, CourseRepository>();
 builder.Services.AddScoped<ICourseService, CourseService>();
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-var app = builder.Build();
+
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCourseDtoValidator>();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+var app = builder.Build(); //
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -35,6 +44,7 @@ if (app.Environment.IsDevelopment())
     });
 }
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 
 app.UseAuthorization();
